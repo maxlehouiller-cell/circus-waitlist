@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Circus — Early Access</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,500;1,600;1,700&family=DM+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,400;9..40,500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg-grey: #26262a;          /* placeholder behind the video */
+    --bone: #f4f1ea;             /* primary text */
+    --bone-dim: rgba(244,241,234,0.58);
+    --bone-faint: rgba(244,241,234,0.32);
+    --line: rgba(244,241,234,0.16);
+    --field: rgba(244,241,234,0.07);
+    --field-focus: rgba(244,241,234,0.12);
+    --up: #5fe39a;               /* the one accent — used only on the upward tick */
+    --ink: #161518;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body { height: 100%; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    color: var(--bone);
+    background: var(--bg-grey);
+    -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+  }
+
+  /* ---------- Full-bleed background (video drops in here) ---------- */
+  .bg {
+    position: fixed;
+    inset: 0;
+    background: var(--bg-grey);
+    z-index: 0;
+  }
+  /* To use a video: add src + poster below and it will play full-bleed.
+     Leaving src empty keeps the neutral grey placeholder. */
+  .bg video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  /* Scrim keeps text readable over any footage */
+  .bg::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(120% 90% at 50% 40%, rgba(0,0,0,0.20), rgba(0,0,0,0.55) 100%),
+      linear-gradient(180deg, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.25) 45%, rgba(0,0,0,0.6) 100%);
+  }
+
+  /* ---------- Layout ---------- */
+  .stage {
+    position: relative;
+    z-index: 1;
+    height: 100%;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    padding: clamp(1.5rem, 5vw, 3rem);
+  }
+
+  .wordmark {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-weight: 600;
+    font-size: 1.25rem;
+    letter-spacing: 0.01em;
+    color: var(--bone);
+  }
+
+  .center {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .panel {
+    width: 100%;
+    max-width: 460px;
+    text-align: center;
+  }
+
+  /* screens */
+  .screen { display: none; }
+  .screen.active { display: block; animation: rise 0.55s cubic-bezier(.2,.7,.2,1) both; }
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--bone-faint);
+    margin-bottom: 1.4rem;
+  }
+
+  .headline {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-weight: 600;
+    font-size: clamp(2.3rem, 8.5vw, 3.4rem);
+    line-height: 1.04;
+    letter-spacing: -0.01em;
+    margin-bottom: 1rem;
+  }
+
+  .sub {
+    font-size: 1rem;
+    line-height: 1.5;
+    color: var(--bone-dim);
+    margin-bottom: 2.2rem;
+    max-width: 30ch;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* email field */
+  .field-row {
+    display: flex;
+    gap: 0.5rem;
+    width: 100%;
+  }
+  .field-row input {
+    flex: 1;
+    min-width: 0;
+    background: var(--field);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    color: var(--bone);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem;
+    padding: 0.95rem 1rem;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .field-row input::placeholder { color: var(--bone-faint); }
+  .field-row input:focus {
+    outline: none;
+    border-color: var(--bone-dim);
+    background: var(--field-focus);
+  }
+
+  .btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    border: 1px solid var(--bone);
+    background: var(--bone);
+    color: var(--ink);
+    border-radius: 2px;
+    padding: 0.95rem 1.3rem;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: opacity 0.2s, transform 0.05s;
+  }
+  .btn:hover { opacity: 0.85; }
+  .btn:active { transform: translateY(1px); }
+  .btn.ghost {
+    background: transparent;
+    color: var(--bone);
+    border-color: var(--line);
+  }
+  .btn.ghost:hover { border-color: var(--bone-dim); opacity: 1; }
+
+  .err {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--bone-dim);
+    margin-top: 0.8rem;
+    min-height: 1rem;
+    letter-spacing: 0.04em;
+  }
+
+  /* position quote — the signature element */
+  .quote-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--bone-faint);
+    margin-bottom: 0.8rem;
+  }
+  .quote {
+    font-family: 'DM Mono', monospace;
+    font-weight: 500;
+    font-size: clamp(3.6rem, 16vw, 5.5rem);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.5rem;
+  }
+  .quote .hash { color: var(--bone-dim); font-size: 0.5em; }
+  .tick {
+    font-family: 'DM Mono', monospace;
+    font-size: 1rem;
+    letter-spacing: 0.1em;
+    color: var(--up);
+    opacity: 0;
+    margin-top: 1rem;
+    height: 1.2rem;
+  }
+  .tick.show { animation: tickin 0.5s ease both; }
+  @keyframes tickin {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .prompt {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-weight: 500;
+    font-size: clamp(1.5rem, 6vw, 2rem);
+    line-height: 1.15;
+    margin: 2.2rem 0 1.6rem;
+  }
+
+  .btn-stack { display: flex; flex-direction: column; gap: 0.6rem; }
+
+  /* questions */
+  .progress {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.22em;
+    color: var(--bone-faint);
+    margin-bottom: 1.4rem;
+  }
+  .question {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-weight: 500;
+    font-size: clamp(1.7rem, 7vw, 2.3rem);
+    line-height: 1.12;
+    margin-bottom: 1.8rem;
+  }
+  .options { display: flex; flex-direction: column; gap: 0.6rem; }
+  .opt {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem;
+    text-align: left;
+    background: var(--field);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    color: var(--bone);
+    padding: 1rem 1.1rem;
+    cursor: pointer;
+    transition: background 0.18s, border-color 0.18s, transform 0.05s;
+  }
+  .opt:hover { background: var(--field-focus); border-color: var(--bone-dim); }
+  .opt:active { transform: translateY(1px); }
+
+  .text-q { display: flex; gap: 0.5rem; }
+  .text-q input {
+    flex: 1; min-width: 0;
+    background: var(--field);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    color: var(--bone);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem;
+    padding: 0.95rem 1rem;
+  }
+  .text-q input:focus { outline: none; border-color: var(--bone-dim); background: var(--field-focus); }
+
+  .closing-line {
+    font-size: 0.95rem;
+    color: var(--bone-dim);
+    margin-top: 1.4rem;
+    line-height: 1.5;
+  }
+
+  .footer {
+    text-align: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.66rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--bone-faint);
+  }
+
+  :focus-visible { outline: 2px solid var(--bone); outline-offset: 2px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .screen.active, .tick.show { animation: none; }
+  }
+
+  @media (max-width: 420px) {
+    .field-row { flex-direction: column; }
+    .btn { width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- ===== Full-bleed background. Drop a video in here later: =====
+       <video autoplay muted loop playsinline poster="POSTER.jpg">
+         <source src="YOUR-VIDEO.mp4" type="video/mp4" />
+       </video>
+       Leave it empty for the neutral grey placeholder.            -->
+  <div class="bg">
+    <video autoplay muted loop playsinline></video>
+  </div>
+
+  <div class="stage">
+    <div class="wordmark">circus</div>
+
+    <div class="center">
+      <div class="panel">
+
+        <!-- SCREEN 0 — email -->
+        <section class="screen active" id="screen-email">
+          <div class="eyebrow">Early access</div>
+          <h1 class="headline">Prove your taste.</h1>
+          <p class="sub">A market for the fans who always knew first. Get on the list.</p>
+          <div class="field-row">
+            <input id="email" type="email" inputmode="email" autocomplete="email"
+                   placeholder="you@email.com" aria-label="Email address" />
+            <button class="btn" id="email-btn">Request access</button>
+          </div>
+          <div class="err" id="email-err"></div>
+        </section>
+
+        <!-- SCREEN 1 — position + move-up prompt -->
+        <section class="screen" id="screen-position">
+          <div class="quote-label">Your spot</div>
+          <div class="quote"><span class="hash">#</span><span id="pos-num">—</span></div>
+          <h2 class="prompt">Do you want to move up in the waitlist?</h2>
+          <div class="btn-stack">
+            <button class="btn" id="moveup-btn">Yes, move me up</button>
+            <button class="btn ghost" id="skip-btn">Maybe later</button>
+          </div>
+        </section>
+
+        <!-- SCREEN 2 — questions -->
+        <section class="screen" id="screen-questions">
+          <div class="progress" id="q-progress">01 / 03</div>
+          <h2 class="question" id="q-text">Question</h2>
+          <div id="q-body"></div>
+        </section>
+
+        <!-- SCREEN 3 — moved up -->
+        <section class="screen" id="screen-done-up">
+          <div class="quote-label">Your spot</div>
+          <div class="quote"><span class="hash">#</span><span id="pos-num-final">—</span></div>
+          <div class="tick" id="tick">▲ moved up 10</div>
+          <p class="closing-line">You're in. We'll be in touch before the doors open.</p>
+        </section>
+
+        <!-- SCREEN 4 — skipped -->
+        <section class="screen" id="screen-done-skip">
+          <div class="quote-label">Your spot</div>
+          <div class="quote"><span class="hash">#</span><span id="pos-num-skip">—</span></div>
+          <p class="closing-line">You're on the list. We'll be in touch before the doors open.</p>
+        </section>
+
+      </div>
+    </div>
+
+    <div class="footer">Circus — the culture market</div>
+  </div>
+
+<script>
+  /* ===================== CONFIG ===================== */
+  const SUPABASE_URL  = "https://cgqifalpfllgugkdklnd.supabase.co";
+  const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNncWlmYWxwZmxsZ3Vna2RrbG5kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzNjE5MDcsImV4cCI6MjA5NTkzNzkwN30.M_AkGElMnrw3cdTd-sVq9TYfoMSyiwbJPicHJihBp38";
+
+  /* ===================== QUESTIONS =====================
+     Swap the wording freely. Each maps to a column in `waitlist`.
+     type 'select' = tap an option to advance.  type 'text' = type + continue. */
+  const QUESTIONS = [
+    {
+      q: 1,   // saves to answer_1 via RPC
+      type: "select",
+      text: "How deep does your fandom go?",
+      options: ["I just like music", "I follow the scene", "I find artists first", "I run a fan page"]
+    },
+    {
+      q: 2,   // saves to answer_2 via RPC
+      type: "select",
+      text: "Have you ever traded before?",
+      options: ["Never", "A little — stocks or crypto", "I trade regularly"]
+    },
+    {
+      q: 3,   // saves to answer_3 via RPC
+      type: "text",
+      text: "Which artist would you back first?",
+      placeholder: "Type their name"
+    }
+  ];
+
+  /* ===================== STATE ===================== */
+  const state = { email: "", startPos: 0, qIndex: 0, submitted: false, busy: false };
+
+  /* ===================== SUPABASE ===================== */
+  // Privacy model: the anon key can only INSERT into `waitlist`. It cannot read or
+  // edit rows. The count and answer-saving go through two locked-down RPC functions
+  // (get_waitlist_count, save_waitlist_answer) that never expose row data.
+  const headers = {
+    "apikey": SUPABASE_ANON,
+    "Authorization": "Bearer " + SUPABASE_ANON,
+    "Content-Type": "application/json"
+  };
+
+  // Save one answer via RPC (q = 1, 2, or 3). Fire-and-forget.
+  async function saveAnswer(q, value) {
+    try {
+      await fetch(SUPABASE_URL + "/rest/v1/rpc/save_waitlist_answer", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ p_email: state.email, p_q: q, p_value: value })
+      });
+    } catch (e) { console.warn("answer save skipped:", e); }
+  }
+
+  /* ===================== HELPERS ===================== */
+  const $ = (id) => document.getElementById(id);
+  const fmt = (n) => n.toLocaleString("en-US");
+  function show(id) {
+    document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+    $(id).classList.add("active");
+  }
+
+  // Insert the signup. Returns 'inserted', 'duplicate' (DB unique constraint rejected it),
+  // or 'error'. The UNIQUE(email) constraint in Supabase is the duplicate gate — no row
+  // is ever created for a repeat email; the database refuses it outright (HTTP 409).
+  async function insertSignup(email) {
+    try {
+      const r = await fetch(SUPABASE_URL + "/rest/v1/waitlist", {
+        method: "POST",
+        headers: { ...headers, "Prefer": "return=minimal" },
+        body: JSON.stringify({ email })
+      });
+      if (r.status === 409) return "duplicate";   // unique violation
+      if (r.ok) return "inserted";
+      return "error";
+    } catch (e) { console.warn("insert skipped:", e); return "error"; }
+  }
+
+  // Live signup count via RPC (no table read needed). Spot = 500 + count. Falls back to 501.
+  async function countPosition() {
+    let count = null;
+    try {
+      const r = await fetch(SUPABASE_URL + "/rest/v1/rpc/get_waitlist_count", {
+        method: "POST",
+        headers,
+        body: "{}"
+      });
+      if (r.ok) {
+        const n = await r.json();                  // returns a bare number
+        if (Number.isFinite(n)) count = n;
+      }
+    } catch (e) { console.warn("count skipped:", e); }
+    const signups = (Number.isFinite(count) && count > 0) ? count : 1;
+    return 500 + signups;
+  }
+  function validEmail(v) {
+    if (!v || v.length > 254) return false;
+    // local-part@domain — domain needs at least one label + a 2+ letter TLD
+    const re = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/;
+    if (!re.test(v)) return false;
+    const local = v.split("@")[0];
+    // no leading/trailing dot and no consecutive dots in the local part
+    if (local.startsWith(".") || local.endsWith(".") || local.includes("..")) return false;
+    return true;
+  }
+
+  /* ===================== EMAIL SCREEN ===================== */
+  async function submitEmail() {
+    if (state.busy || state.submitted) return;     // ignore double-clicks / already advanced
+    const v = $("email").value.trim().toLowerCase(); // normalize so Case@x = case@x
+    if (!validEmail(v)) {
+      $("email-err").textContent = "Enter a valid email address to continue.";
+      $("email").focus();
+      return;
+    }
+    $("email-err").textContent = "";
+
+    const btn = $("email-btn");
+    const label = btn.textContent;
+    state.busy = true;
+    btn.disabled = true;
+    btn.textContent = "…";
+
+    // insert — the DB refuses duplicates outright (unique constraint), nothing is ever added twice
+    const result = await insertSignup(v);
+    if (result === "duplicate") {
+      $("email-err").textContent = "No duplicate emails — this one's already on the list.";
+      btn.disabled = false;
+      btn.textContent = label;
+      state.busy = false;
+      return;
+    }
+
+    state.email = v;
+    state.startPos = await countPosition();         // real: 500 + signups
+    $("pos-num").textContent = fmt(state.startPos);
+
+    state.submitted = true;
+    state.busy = false;
+    btn.disabled = false;
+    btn.textContent = label;
+    show("screen-position");
+  }
+  $("email-btn").addEventListener("click", submitEmail);
+  $("email").addEventListener("keydown", (e) => { if (e.key === "Enter") submitEmail(); });
+  // clear the error as soon as they start fixing it
+  $("email").addEventListener("input", () => { $("email-err").textContent = ""; });
+
+  /* ===================== POSITION SCREEN ===================== */
+  $("moveup-btn").addEventListener("click", () => { state.qIndex = 0; renderQuestion(); show("screen-questions"); });
+  $("skip-btn").addEventListener("click", () => {
+    $("pos-num-skip").textContent = fmt(state.startPos);
+    show("screen-done-skip");
+  });
+
+  /* ===================== QUESTIONS ===================== */
+  function renderQuestion() {
+    const q = QUESTIONS[state.qIndex];
+    $("q-progress").textContent =
+      String(state.qIndex + 1).padStart(2, "0") + " / " + String(QUESTIONS.length).padStart(2, "0");
+    $("q-text").textContent = q.text;
+    const body = $("q-body");
+    body.innerHTML = "";
+
+    if (q.type === "select") {
+      const wrap = document.createElement("div");
+      wrap.className = "options";
+      q.options.forEach(opt => {
+        const b = document.createElement("button");
+        b.className = "opt";
+        b.textContent = opt;
+        b.addEventListener("click", () => answer(q.q, opt));
+        wrap.appendChild(b);
+      });
+      body.appendChild(wrap);
+    } else {
+      const wrap = document.createElement("div");
+      wrap.className = "text-q";
+      const input = document.createElement("input");
+      input.type = "text";
+      input.placeholder = q.placeholder || "";
+      input.setAttribute("aria-label", q.text);
+      const go = document.createElement("button");
+      go.className = "btn";
+      go.textContent = "→";
+      const submit = () => { const val = input.value.trim(); if (val) answer(q.q, val); };
+      go.addEventListener("click", submit);
+      input.addEventListener("keydown", (e) => { if (e.key === "Enter") submit(); });
+      wrap.appendChild(input);
+      wrap.appendChild(go);
+      body.appendChild(wrap);
+      setTimeout(() => input.focus(), 50);
+    }
+  }
+
+  function answer(q, value) {
+    saveAnswer(q, value);                          // real write via locked-down RPC
+    if (state.qIndex < QUESTIONS.length - 1) {
+      state.qIndex++;
+      renderQuestion();
+    } else {
+      finishMovedUp();
+    }
+  }
+
+  /* ===================== MOVED-UP SCREEN ===================== */
+  function finishMovedUp() {
+    const from = state.startPos;
+    const to = state.startPos - 10;             // cosmetic +10 spots
+    show("screen-done-up");
+    animateCount($("pos-num-final"), from, to, 650, () => {
+      $("tick").classList.add("show");
+    });
+  }
+  function animateCount(el, from, to, dur, done) {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      el.textContent = fmt(to); if (done) done(); return;
+    }
+    const start = performance.now();
+    function step(now) {
+      const t = Math.min(1, (now - start) / dur);
+      const eased = 1 - Math.pow(1 - t, 3);
+      el.textContent = fmt(Math.round(from + (to - from) * eased));
+      if (t < 1) requestAnimationFrame(step);
+      else if (done) done();
+    }
+    requestAnimationFrame(step);
+  }
+</script>
+</body>
+</html>
