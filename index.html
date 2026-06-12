@@ -25,6 +25,14 @@
     font-style: italic;
     font-display: swap;
   }
+  /* Karrik Regular — eyebrow + footer */
+  @font-face {
+    font-family: 'Karrik';
+    src: url('fonts/Karrik-Regular.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
 
   :root {
     --bg-grey: #c1121f;          /* circus red — placeholder behind the video */
@@ -47,6 +55,7 @@
     color: var(--bone);
     background: var(--bg-grey);
     -webkit-font-smoothing: antialiased;
+    text-transform: lowercase;
     overflow: hidden;
   }
 
@@ -117,10 +126,11 @@
   }
 
   .eyebrow {
-    font-family: 'Sligoil Micro', monospace;
-    font-size: 0.7rem;
-    letter-spacing: 0.28em;
-    text-transform: uppercase;
+    font-family: 'Karrik', serif;
+    font-style: normal;
+    font-size: 0.85rem;
+    letter-spacing: 0.12em;
+    text-transform: lowercase;
     color: var(--bone-faint);
     margin-bottom: 1.4rem;
   }
@@ -177,7 +187,7 @@
     font-family: 'Sligoil Micro', monospace;
     font-size: 0.78rem;
     letter-spacing: 0.12em;
-    text-transform: uppercase;
+    text-transform: lowercase;
     border: 1px solid var(--bone);
     background: var(--bone);
     color: var(--ink);
@@ -210,7 +220,7 @@
     font-family: 'Sligoil Micro', monospace;
     font-size: 0.7rem;
     letter-spacing: 0.28em;
-    text-transform: uppercase;
+    text-transform: lowercase;
     color: var(--bone-faint);
     margin-bottom: 0.8rem;
   }
@@ -305,10 +315,11 @@
 
   .footer {
     text-align: center;
-    font-family: 'Sligoil Micro', monospace;
-    font-size: 0.66rem;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
+    font-family: 'Karrik', serif;
+    font-style: normal;
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    text-transform: lowercase;
     color: var(--bone-faint);
   }
 
