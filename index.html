@@ -33,6 +33,14 @@
     font-style: normal;
     font-display: swap;
   }
+  /* Avara (variable) — everything except the circus wordmark */
+  @font-face {
+    font-family: 'Avara';
+    src: url('fonts/AvaraVariable.woff2') format('woff2');
+    font-weight: 400 900;
+    font-style: normal;
+    font-display: swap;
+  }
 
   :root {
     --bg-grey: #c1121f;          /* circus red — placeholder behind the video */
@@ -51,7 +59,7 @@
   html, body { height: 100%; }
 
   body {
-    font-family: 'DM Sans', sans-serif;
+    font-family: 'Avara', serif;
     color: var(--bone);
     background: var(--bg-grey);
     -webkit-font-smoothing: antialiased;
@@ -96,7 +104,7 @@
   }
 
   .wordmark {
-    font-family: 'Sligoil Micro', monospace;
+    font-family: 'Sligoil Micro', monospace; /* KEEP-WORDMARK */
     font-style: normal;
     font-weight: 600;
     font-size: 1.25rem;
@@ -126,7 +134,7 @@
   }
 
   .eyebrow {
-    font-family: 'Karrik', serif;
+    font-family: 'Avara', serif;
     font-style: normal;
     font-size: 0.85rem;
     letter-spacing: 0.12em;
@@ -136,9 +144,9 @@
   }
 
   .headline {
-    font-family: 'Karrik', serif;
+    font-family: 'Avara', serif;
     font-style: normal;
-    font-weight: 400;
+    font-weight: 700;
     text-transform: none;
     font-size: clamp(2rem, 8vw, 3.2rem);
     line-height: 1.04;
@@ -148,7 +156,7 @@
   }
 
   .sub {
-    font-family: 'Karrik', serif;
+    font-family: 'Avara', serif;
     font-style: normal;
     font-size: 1rem;
     line-height: 1.5;
@@ -172,7 +180,7 @@
     border: 1px solid var(--line);
     border-radius: 2px;
     color: var(--bone);
-    font-family: 'DM Sans', sans-serif;
+    font-family: 'Avara', serif;
     font-size: 1rem;
     padding: 0.95rem 1rem;
     transition: border-color 0.2s, background 0.2s;
@@ -185,7 +193,7 @@
   }
 
   .btn {
-    font-family: 'Sligoil Micro', monospace;
+    font-family: 'Avara', serif;
     font-size: 0.78rem;
     letter-spacing: 0.12em;
     text-transform: lowercase;
@@ -208,7 +216,7 @@
   .btn.ghost:hover { border-color: var(--bone-dim); opacity: 1; }
 
   .err {
-    font-family: 'Sligoil Micro', monospace;
+    font-family: 'Avara', serif;
     font-size: 0.72rem;
     color: var(--bone-dim);
     margin-top: 0.8rem;
@@ -218,7 +226,7 @@
 
   /* position quote — the signature element */
   .quote-label {
-    font-family: 'Sligoil Micro', monospace;
+    font-family: 'Avara', serif;
     font-size: 0.7rem;
     letter-spacing: 0.28em;
     text-transform: lowercase;
@@ -226,7 +234,7 @@
     margin-bottom: 0.8rem;
   }
   .quote {
-    font-family: 'Sligoil Micro', monospace;
+    font-family: 'Avara', serif;
     font-weight: 500;
     font-size: clamp(3.6rem, 16vw, 5.5rem);
     line-height: 1;
@@ -237,7 +245,7 @@
   }
   .quote .hash { color: var(--bone-dim); font-size: 0.5em; }
   .tick {
-    font-family: 'Sligoil Micro', monospace;
+    font-family: 'Avara', serif;
     font-size: 1rem;
     letter-spacing: 0.1em;
     color: var(--up);
@@ -252,7 +260,7 @@
   }
 
   .prompt {
-    font-family: 'Sligoil Micro', monospace;
+    font-family: 'Avara', serif;
     font-style: normal;
     font-weight: 500;
     font-size: clamp(1.5rem, 6vw, 2rem);
@@ -264,14 +272,14 @@
 
   /* questions */
   .progress {
-    font-family: 'Sligoil Micro', monospace;
+    font-family: 'Avara', serif;
     font-size: 0.7rem;
     letter-spacing: 0.22em;
     color: var(--bone-faint);
     margin-bottom: 1.4rem;
   }
   .question {
-    font-family: 'Sligoil Micro', monospace;
+    font-family: 'Avara', serif;
     font-style: normal;
     font-weight: 500;
     font-size: clamp(1.7rem, 7vw, 2.3rem);
@@ -280,7 +288,7 @@
   }
   .options { display: flex; flex-direction: column; gap: 0.6rem; }
   .opt {
-    font-family: 'DM Sans', sans-serif;
+    font-family: 'Avara', serif;
     font-size: 1rem;
     text-align: left;
     background: var(--field);
@@ -301,7 +309,7 @@
     border: 1px solid var(--line);
     border-radius: 2px;
     color: var(--bone);
-    font-family: 'DM Sans', sans-serif;
+    font-family: 'Avara', serif;
     font-size: 1rem;
     padding: 0.95rem 1rem;
   }
@@ -316,7 +324,7 @@
 
   .footer {
     text-align: center;
-    font-family: 'Karrik', serif;
+    font-family: 'Avara', serif;
     font-style: normal;
     font-size: 0.8rem;
     letter-spacing: 0.08em;
