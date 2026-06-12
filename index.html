@@ -17,6 +17,15 @@
     font-display: swap;
   }
 
+  /* Karrik Italic — first-page subheading */
+  @font-face {
+    font-family: 'Karrik';
+    src: url('fonts/Karrik-Italic.woff2') format('woff2');
+    font-weight: 400;
+    font-style: italic;
+    font-display: swap;
+  }
+
   :root {
     --bg-grey: #c1121f;          /* circus red — placeholder behind the video */
     --bone: #ffffff;             /* primary text — white */
@@ -128,6 +137,8 @@
   }
 
   .sub {
+    font-family: 'Karrik', serif;
+    font-style: italic;
     font-size: 1rem;
     line-height: 1.5;
     color: var(--bone-dim);
