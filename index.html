@@ -340,6 +340,11 @@
   }
 
   .footer {
+    position: fixed;
+    left: clamp(1.5rem, 5vw, 3rem);
+    /* lift it so its baseline lines up with the big circus wordmark */
+    bottom: calc(clamp(1.5rem, 5vw, 3rem) + 0.18 * clamp(2.5rem, 7vw, 8rem));
+    z-index: 3;
     text-align: left;
     font-family: 'Karrik', serif;
     font-style: normal;
