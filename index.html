@@ -104,12 +104,23 @@
   }
 
   .wordmark {
+    position: fixed;
+    left: clamp(1.5rem, 5vw, 3rem);
+    bottom: clamp(1.5rem, 5vw, 3rem);
+    z-index: 3;
     font-family: 'Sligoil Micro', monospace; /* KEEP-WORDMARK */
     font-style: normal;
     font-weight: 600;
     font-size: 1.9rem;
     letter-spacing: 0.01em;
     color: var(--bone);
+    transform-origin: left bottom;
+    animation: wordmark-in 1.15s cubic-bezier(.2,.7,.2,1) both;
+  }
+  @keyframes wordmark-in {
+    0%   { opacity: 0; transform: translate(55vw, -74vh) scale(3.6); }
+    15%  { opacity: 1; }
+    100% { opacity: 1; transform: translate(0, 0) scale(1); }
   }
 
   .center {
@@ -117,6 +128,11 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    animation: hero-fade 0.8s ease 1.05s both;
+  }
+  @keyframes hero-fade {
+    from { opacity: 0; }
+    to   { opacity: 1; }
   }
 
   .panel {
@@ -330,12 +346,14 @@
     letter-spacing: 0.08em;
     text-transform: lowercase;
     color: var(--bone-faint);
+    animation: hero-fade 0.8s ease 1.05s both;
   }
 
   :focus-visible { outline: 2px solid var(--bone); outline-offset: 2px; }
 
   @media (prefers-reduced-motion: reduce) {
-    .screen.active, .tick.show { animation: none; }
+    .screen.active, .tick.show,
+    .wordmark, .center, .footer { animation: none; }
   }
 
   @media (max-width: 420px) {
