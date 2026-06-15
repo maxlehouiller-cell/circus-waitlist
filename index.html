@@ -185,6 +185,21 @@
     margin-right: auto;
   }
 
+  /* clown "sticker" slapped on next to the tagline */
+  .clown-sticker {
+    display: inline-block;
+    width: 2.7em;
+    height: auto;
+    vertical-align: middle;
+    margin-left: 0.55em;
+    margin-top: -0.2em;
+    background: #fff;
+    padding: 0.32em;
+    border-radius: 0.5em;
+    transform: rotate(9deg);
+    box-shadow: 0 5px 14px rgba(0,0,0,0.4);
+  }
+
   /* email field */
   .field-row {
     display: flex;
@@ -392,7 +407,7 @@
         <section class="screen active" id="screen-email">
           <div class="eyebrow">Early access</div>
           <h1 class="headline">prove your taste.</h1>
-          <p class="sub">A market for the fans who always knew first. Get on the list.</p>
+          <p class="sub">A market for the fans who always knew first. Get on the list.<img class="clown-sticker" src="media/clown.webp" alt="" aria-hidden="true" /></p>
           <div class="field-row">
             <input id="email" type="email" inputmode="email" autocomplete="email"
                    placeholder="you@email.com" aria-label="Email address" />
