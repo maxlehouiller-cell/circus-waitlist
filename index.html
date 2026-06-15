@@ -111,17 +111,17 @@
     font-family: 'Sligoil Micro', monospace; /* KEEP-WORDMARK */
     font-style: normal;
     font-weight: 600;
-    font-size: 1.9rem;
+    font-size: clamp(2.5rem, 7vw, 8rem);   /* rest size ≈ 1/4 of screen width */
     letter-spacing: 0.01em;
     color: var(--bone);
     transform-origin: left bottom;
-    animation: wordmark-in 3.4s cubic-bezier(.5,0,.2,1) both;
+    animation: wordmark-in 5.6s cubic-bezier(.5,0,.2,1) both;
   }
   @keyframes wordmark-in {
-    0%   { opacity: 0; transform: translate(0, -40vh) scale(5); }
-    12%  { opacity: 1; transform: translate(0, -40vh) scale(5); }  /* fade in, big (left side) */
-    50%  { opacity: 1; transform: translate(0, -40vh) scale(5); }  /* hold / pause */
-    100% { opacity: 1; transform: translate(0, 0) scale(1); }      /* settle bottom-left */
+    0%   { opacity: 0; transform: translate(0, -36vh) scale(2.2); }
+    5%   { opacity: 1; transform: translate(0, -36vh) scale(2.2); }  /* fade in, big */
+    71%  { opacity: 1; transform: translate(0, -36vh) scale(2.2); }  /* hold ~4s */
+    100% { opacity: 1; transform: translate(0, 0) scale(1); }        /* shrink to rest (≈1/4 screen) */
   }
 
   .center {
@@ -129,7 +129,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    animation: hero-fade 0.9s ease 3.3s both;
+    animation: hero-fade 0.9s ease 5.4s both;
   }
   @keyframes hero-fade {
     from { opacity: 0; }
@@ -347,7 +347,7 @@
     letter-spacing: 0.08em;
     text-transform: lowercase;
     color: var(--bone-faint);
-    animation: hero-fade 0.9s ease 3.3s both;
+    animation: hero-fade 0.9s ease 5.4s both;
   }
 
   :focus-visible { outline: 2px solid var(--bone); outline-offset: 2px; }
