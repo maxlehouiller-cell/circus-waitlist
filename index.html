@@ -118,10 +118,10 @@
     animation: wordmark-in 3.4s cubic-bezier(.5,0,.2,1) both;
   }
   @keyframes wordmark-in {
-    0%   { opacity: 0; transform: translate(30vw, -40vh) scale(5); }
-    12%  { opacity: 1; transform: translate(30vw, -40vh) scale(5); }  /* fade in, big */
-    50%  { opacity: 1; transform: translate(30vw, -40vh) scale(5); }  /* hold / pause */
-    100% { opacity: 1; transform: translate(0, 0) scale(1); }         /* settle bottom-left */
+    0%   { opacity: 0; transform: translate(0, -40vh) scale(5); }
+    12%  { opacity: 1; transform: translate(0, -40vh) scale(5); }  /* fade in, big (left side) */
+    50%  { opacity: 1; transform: translate(0, -40vh) scale(5); }  /* hold / pause */
+    100% { opacity: 1; transform: translate(0, 0) scale(1); }      /* settle bottom-left */
   }
 
   .center {
