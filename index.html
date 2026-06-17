@@ -399,10 +399,19 @@
        </video>
        Leave it empty for the neutral grey placeholder.            -->
   <div class="bg">
-    <video autoplay muted loop playsinline preload="auto">
-      <source src="media/bg.mp4" type="video/mp4" />
-    </video>
+    <!-- two clips played back-to-back, then looped -->
+    <video id="bg-video" autoplay muted playsinline preload="auto"></video>
   </div>
+  <script>
+    (function () {
+      var clips = ["media/bg.mp4", "media/bg2.mp4"];
+      var i = 0;
+      var v = document.getElementById("bg-video");
+      function play(n) { v.src = clips[n]; var p = v.play(); if (p) p.catch(function () {}); }
+      v.addEventListener("ended", function () { i = (i + 1) % clips.length; play(i); });
+      play(0);
+    })();
+  </script>
 
   <div class="stage">
     <div class="wordmark">circus</div>
