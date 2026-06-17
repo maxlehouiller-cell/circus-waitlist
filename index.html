@@ -166,7 +166,7 @@
     font-weight: 400;
     color: #c1121f;
     text-transform: none;
-    font-size: clamp(2rem, 8vw, 3.2rem);
+    font-size: clamp(1.5rem, 8vw, 3.2rem);
     line-height: 1.04;
     letter-spacing: -0.02em;
     white-space: nowrap;
@@ -375,9 +375,19 @@
     .wordmark, .center, .footer { animation: none; }
   }
 
-  @media (max-width: 420px) {
+  @media (max-width: 600px) {
+    /* stack the email field + button so they're full-width and easy to tap */
     .field-row { flex-direction: column; }
     .btn { width: 100%; }
+
+    /* shrink the corner marks so the bottom-left footer and bottom-right
+       wordmark don't collide on narrow screens */
+    .wordmark { font-size: clamp(1.8rem, 9vw, 2.6rem); }
+    .footer {
+      font-size: 0.58rem;
+      letter-spacing: 0.03em;
+      bottom: calc(clamp(0.4rem, 1.6vw, 1rem) + 0.18 * clamp(1.8rem, 9vw, 2.6rem));
+    }
   }
 </style>
 </head>
