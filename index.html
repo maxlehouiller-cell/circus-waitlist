@@ -77,10 +77,14 @@
   /* To use a video: add src + poster below and it will play full-bleed.
      Leaving src empty keeps the neutral grey placeholder. */
   .bg video {
+    position: absolute;
+    inset: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
     display: block;
+    opacity: 0;
+    transition: opacity 0.6s ease;
   }
   /* Scrim keeps text readable over any footage */
   .bg::after {
@@ -399,17 +403,42 @@
        </video>
        Leave it empty for the neutral grey placeholder.            -->
   <div class="bg">
-    <!-- two clips played back-to-back, then looped -->
-    <video id="bg-video" autoplay muted playsinline preload="auto"></video>
+    <!-- two stacked videos crossfade so clip changes are seamless (no gap/flash) -->
+    <video class="bg-vid" id="bg-v0" muted playsinline preload="auto"></video>
+    <video class="bg-vid" id="bg-v1" muted playsinline preload="auto"></video>
   </div>
   <script>
     (function () {
       var clips = ["media/bg.mp4", "media/bg2.mp4"];
-      var i = 0;
-      var v = document.getElementById("bg-video");
-      function play(n) { v.src = clips[n]; var p = v.play(); if (p) p.catch(function () {}); }
-      v.addEventListener("ended", function () { i = (i + 1) % clips.length; play(i); });
-      play(0);
+      var vids = [document.getElementById("bg-v0"), document.getElementById("bg-v1")];
+      var active = 0;    // which video element is visible
+      var curClip = 0;   // clip index playing in the active element
+      function go(v) { var p = v.play(); if (p) p.catch(function () {}); }
+
+      // active plays clip 0; the other preloads clip 1 ready for the swap
+      vids[0].src = clips[0];
+      vids[1].src = clips[1 % clips.length];
+      vids[0].style.opacity = 1;
+      go(vids[0]);
+
+      function swap() {
+        var nextV = (active + 1) % 2;
+        curClip = (curClip + 1) % clips.length;     // nextV already holds this clip
+        try { vids[nextV].currentTime = 0; } catch (e) {}
+        go(vids[nextV]);
+        vids[nextV].style.opacity = 1;              // crossfade in
+        vids[active].style.opacity = 0;             // crossfade out
+        var oldV = active;
+        active = nextV;
+        // once the old one is hidden, repoint it to the upcoming clip (no visible flash)
+        setTimeout(function () {
+          vids[oldV].src = clips[(curClip + 1) % clips.length];
+          vids[oldV].load();
+        }, 700);
+      }
+
+      vids[0].addEventListener("ended", function () { if (active === 0) swap(); });
+      vids[1].addEventListener("ended", function () { if (active === 1) swap(); });
     })();
   </script>
 
