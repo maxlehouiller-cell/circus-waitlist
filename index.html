@@ -453,8 +453,19 @@
         }, 700);
       }
 
-      vids[0].addEventListener("ended", function () { if (active === 0) swap(); });
-      vids[1].addEventListener("ended", function () { if (active === 1) swap(); });
+      // when the active clip ends: advance only if the next clip is fully buffered,
+      // otherwise replay the current clip and try again on its next loop
+      function tryAdvance() {
+        var nextV = (active + 1) % 2;
+        if (vids[nextV].getAttribute("src") && vids[nextV].readyState >= 4) {
+          swap();
+        } else {
+          try { vids[active].currentTime = 0; } catch (e) {}
+          go(vids[active]);   // loop current clip while the next one keeps loading
+        }
+      }
+      vids[0].addEventListener("ended", function () { if (active === 0) tryAdvance(); });
+      vids[1].addEventListener("ended", function () { if (active === 1) tryAdvance(); });
     })();
   </script>
 
