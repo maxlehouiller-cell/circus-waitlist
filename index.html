@@ -410,7 +410,7 @@
   <script>
     (function () {
       // first clip is fixed; the rest are shuffled on each load
-      var rest = ["media/bg2.mp4", "media/bg3.mp4", "media/bg4.mp4"];
+      var rest = ["media/bg2.mp4", "media/bg3.mp4"];
       for (var j = rest.length - 1; j > 0; j--) {
         var k = Math.floor(Math.random() * (j + 1));
         var tmp = rest[j]; rest[j] = rest[k]; rest[k] = tmp;
