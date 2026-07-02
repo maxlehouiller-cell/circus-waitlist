@@ -415,7 +415,8 @@
         var k = Math.floor(Math.random() * (j + 1));
         var tmp = rest[j]; rest[j] = rest[k]; rest[k] = tmp;
       }
-      var clips = ["media/bg.mp4"].concat(rest);
+      // clip 1 fixed first, obsession clip fixed second, then the shuffled rest
+      var clips = ["media/bg.mp4", "media/obsession.mp4"].concat(rest);
       var vids = [document.getElementById("bg-v0"), document.getElementById("bg-v1")];
       var active = 0;    // which video element is visible
       var curClip = 0;   // clip index playing in the active element
