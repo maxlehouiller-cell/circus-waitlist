@@ -420,6 +420,12 @@
       var vids = [document.getElementById("bg-v0"), document.getElementById("bg-v1")];
       var active = 0;    // which video element is visible
       var curClip = 0;   // clip index playing in the active element
+      // per-clip start offset (seconds) — e.g. skip the brunson clip's first 5s
+      var startAt = { "media/bg3.mp4": 5 };
+      function resetTime(v) {
+        var s = v.getAttribute("src") || "";
+        try { v.currentTime = startAt[s] || 0; } catch (e) {}
+      }
       function go(v) { var p = v.play(); if (p) p.catch(function () {}); }
 
       // load clip 0 first so it appears fast; fetch clip 1 only once clip 0 is
@@ -441,7 +447,7 @@
       function swap() {
         var nextV = (active + 1) % 2;
         curClip = (curClip + 1) % clips.length;     // nextV already holds this clip
-        try { vids[nextV].currentTime = 0; } catch (e) {}
+        resetTime(vids[nextV]);
         go(vids[nextV]);
         vids[nextV].style.opacity = 1;              // crossfade in
         vids[active].style.opacity = 0;             // crossfade out
@@ -461,7 +467,7 @@
         if (vids[nextV].getAttribute("src") && vids[nextV].readyState >= 4) {
           swap();
         } else {
-          try { vids[active].currentTime = 0; } catch (e) {}
+          resetTime(vids[active]);
           go(vids[active]);   // loop current clip while the next one keeps loading
         }
       }
