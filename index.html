@@ -405,7 +405,7 @@
   <div class="bg">
     <!-- two stacked videos crossfade so clip changes are seamless (no gap/flash) -->
     <video class="bg-vid" id="bg-v0" muted playsinline preload="auto"></video>
-    <video class="bg-vid" id="bg-v1" muted playsinline preload="auto"></video>
+    <video class="bg-vid" id="bg-v1" muted playsinline preload="none"></video>
   </div>
   <script>
     (function () {
@@ -415,11 +415,16 @@
       var curClip = 0;   // clip index playing in the active element
       function go(v) { var p = v.play(); if (p) p.catch(function () {}); }
 
-      // active plays clip 0; the other preloads clip 1 ready for the swap
+      // load clip 0 first so it appears fast; fetch clip 1 only once clip 0 is
+      // actually playing, so the two downloads don't fight for bandwidth up front
       vids[0].src = clips[0];
-      vids[1].src = clips[1 % clips.length];
       vids[0].style.opacity = 1;
       go(vids[0]);
+      vids[0].addEventListener("playing", function loadNext() {
+        vids[0].removeEventListener("playing", loadNext);
+        vids[1].src = clips[1 % clips.length];
+        vids[1].load();
+      });
 
       function swap() {
         var nextV = (active + 1) % 2;
