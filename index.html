@@ -420,11 +420,16 @@
       vids[0].src = clips[0];
       vids[0].style.opacity = 1;
       go(vids[0]);
-      vids[0].addEventListener("playing", function loadNext() {
-        vids[0].removeEventListener("playing", loadNext);
+      var clip1Loaded = false;
+      function loadClip1() {
+        if (clip1Loaded) return;
+        clip1Loaded = true;
         vids[1].src = clips[1 % clips.length];
         vids[1].load();
-      });
+      }
+      vids[0].addEventListener("playing", loadClip1, { once: true });
+      // fallback so clip 2 still loads even if 'playing' never fires (blocked autoplay)
+      setTimeout(loadClip1, 2500);
 
       function swap() {
         var nextV = (active + 1) % 2;
