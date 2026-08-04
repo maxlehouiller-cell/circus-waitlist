@@ -423,7 +423,7 @@
       var CLIP_LEN = 5;  // seconds each clip is shown before cutting to the next
       var advanced = false; // guard so a clip only triggers one advance
       // per-clip start offset (seconds) — e.g. skip the brunson clip's first 5s
-      var startAt = { "media/bg3.mp4": 5 };
+      var startAt = { "media/bg3.mp4": 5, "media/bg2.mp4": 3 };
       function startOffset(v) { return startAt[v.getAttribute("src") || ""] || 0; }
       function resetTime(v) {
         try { v.currentTime = startOffset(v); } catch (e) {}
