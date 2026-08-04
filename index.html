@@ -420,11 +420,13 @@
       var vids = [document.getElementById("bg-v0"), document.getElementById("bg-v1")];
       var active = 0;    // which video element is visible
       var curClip = 0;   // clip index playing in the active element
+      var CLIP_LEN = 5;  // seconds each clip is shown before cutting to the next
+      var advanced = false; // guard so a clip only triggers one advance
       // per-clip start offset (seconds) — e.g. skip the brunson clip's first 5s
       var startAt = { "media/bg3.mp4": 5 };
+      function startOffset(v) { return startAt[v.getAttribute("src") || ""] || 0; }
       function resetTime(v) {
-        var s = v.getAttribute("src") || "";
-        try { v.currentTime = startAt[s] || 0; } catch (e) {}
+        try { v.currentTime = startOffset(v); } catch (e) {}
       }
       function go(v) { var p = v.play(); if (p) p.catch(function () {}); }
 
@@ -453,6 +455,7 @@
         vids[active].style.opacity = 0;             // crossfade out
         var oldV = active;
         active = nextV;
+        advanced = false;   // new clip gets a fresh 5s window
         // once the old one is hidden, repoint it to the upcoming clip (no visible flash)
         setTimeout(function () {
           vids[oldV].src = clips[(curClip + 1) % clips.length];
@@ -460,19 +463,31 @@
         }, 700);
       }
 
-      // when the active clip ends: advance only if the next clip is fully buffered,
-      // otherwise replay the current clip and try again on its next loop
+      // advance to the next clip only if it's fully buffered; otherwise replay the
+      // current clip's 5s window while the next one keeps loading
       function tryAdvance() {
         var nextV = (active + 1) % 2;
         if (vids[nextV].getAttribute("src") && vids[nextV].readyState >= 4) {
           swap();
         } else {
+          advanced = false;
           resetTime(vids[active]);
-          go(vids[active]);   // loop current clip while the next one keeps loading
+          go(vids[active]);
         }
       }
-      vids[0].addEventListener("ended", function () { if (active === 0) tryAdvance(); });
-      vids[1].addEventListener("ended", function () { if (active === 1) tryAdvance(); });
+      // cut to the next clip after CLIP_LEN seconds of playback (from its start offset),
+      // or if the clip ends first
+      function maybeAdvance(v, force) {
+        if (v !== vids[active] || advanced) return;
+        if (force || v.currentTime - startOffset(v) >= CLIP_LEN) {
+          advanced = true;
+          tryAdvance();
+        }
+      }
+      vids[0].addEventListener("timeupdate", function () { maybeAdvance(vids[0], false); });
+      vids[1].addEventListener("timeupdate", function () { maybeAdvance(vids[1], false); });
+      vids[0].addEventListener("ended", function () { maybeAdvance(vids[0], true); });
+      vids[1].addEventListener("ended", function () { maybeAdvance(vids[1], true); });
     })();
   </script>
 
