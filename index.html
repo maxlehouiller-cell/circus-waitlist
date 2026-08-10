@@ -399,6 +399,20 @@
   }
   .rank-reset:hover { color: var(--bone-dim); }
 
+  .q-back {
+    display: inline-block;
+    background: none;
+    border: none;
+    color: var(--bone-faint);
+    font-family: 'Karrik', serif;
+    font-size: 0.82rem;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    margin-bottom: 1rem;
+    transition: color 0.18s;
+  }
+  .q-back:hover { color: var(--bone-dim); }
+
   .text-q { display: flex; gap: 0.5rem; }
   .text-q input {
     flex: 1; min-width: 0;
@@ -585,6 +599,7 @@
 
         <!-- SCREEN 2 — questions -->
         <section class="screen" id="screen-questions">
+          <button class="q-back" id="q-back">← back</button>
           <div class="progress" id="q-progress">01 / 03</div>
           <h2 class="question" id="q-text">Question</h2>
           <div id="q-body"></div>
@@ -767,6 +782,11 @@
 
   /* ===================== POSITION SCREEN ===================== */
   $("moveup-btn").addEventListener("click", () => { state.qIndex = 0; renderQuestion(); show("screen-questions"); });
+  // step back to the previous question (or back to the position screen from Q1)
+  $("q-back").addEventListener("click", () => {
+    if (state.qIndex > 0) { state.qIndex--; renderQuestion(); }
+    else { show("screen-position"); }
+  });
 
   /* ===================== QUESTIONS ===================== */
   function renderQuestion() {
