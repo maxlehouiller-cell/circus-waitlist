@@ -355,6 +355,50 @@
   .opt:hover { background: var(--field-focus); border-color: var(--bone-dim); }
   .opt:active { transform: translateY(1px); }
 
+  /* rank question (tap-to-order) */
+  .q-sub {
+    font-family: 'Karrik', serif;
+    font-size: 0.92rem;
+    color: var(--bone-dim);
+    text-align: center;
+    margin-bottom: 1.2rem;
+  }
+  .rank-opt { display: flex; align-items: center; gap: 0.85rem; }
+  .rank-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 1.7rem;
+    height: 1.7rem;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    font-family: 'Sligoil Micro', monospace;
+    font-size: 0.8rem;
+    color: var(--bone-faint);
+    transition: background 0.18s, color 0.18s, border-color 0.18s;
+  }
+  .rank-opt.ranked { border-color: var(--bone); opacity: 0.9; }
+  .rank-opt.ranked .rank-badge {
+    background: var(--bone);
+    color: var(--ink);
+    border-color: var(--bone);
+  }
+  .rank-reset {
+    display: block;
+    margin: 1.1rem auto 0;
+    background: none;
+    border: none;
+    color: var(--bone-faint);
+    font-family: 'Karrik', serif;
+    font-size: 0.82rem;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .rank-reset:hover { color: var(--bone-dim); }
+
   .text-q { display: flex; gap: 0.5rem; }
   .text-q input {
     flex: 1; min-width: 0;
@@ -577,10 +621,11 @@
      type 'select' = tap an option to advance.  type 'text' = type + continue. */
   const QUESTIONS = [
     {
-      q: 1,   // saves to answer_1 via RPC
-      type: "select",
-      text: "How deep does your fandom go?",
-      options: ["I just like music", "I follow the scene", "I find artists first", "I run a fan page"]
+      q: 1,   // saves to answer_1 via RPC (stored as the ranked order, comma-joined)
+      type: "rank",
+      text: "Rank your obsessions.",
+      sub: "Tap in order — 1 is your ride-or-die.",
+      options: ["Music", "Sports", "Film", "Art"]
     },
     {
       q: 2,   // saves to answer_2 via RPC
@@ -743,6 +788,42 @@
         wrap.appendChild(b);
       });
       body.appendChild(wrap);
+    } else if (q.type === "rank") {
+      if (q.sub) {
+        const sub = document.createElement("div");
+        sub.className = "q-sub";
+        sub.textContent = q.sub;
+        body.appendChild(sub);
+      }
+      const wrap = document.createElement("div");
+      wrap.className = "options";
+      const order = [];
+      q.options.forEach(opt => {
+        const b = document.createElement("button");
+        b.className = "opt rank-opt";
+        const badge = document.createElement("span");
+        badge.className = "rank-badge";
+        const label = document.createElement("span");
+        label.textContent = opt;
+        b.appendChild(badge);
+        b.appendChild(label);
+        b.addEventListener("click", () => {
+          if (b.classList.contains("ranked")) return;
+          order.push(opt);
+          b.classList.add("ranked");
+          badge.textContent = order.length;
+          if (order.length === q.options.length) {
+            setTimeout(() => answer(q.q, order.join(", ")), 380);
+          }
+        });
+        wrap.appendChild(b);
+      });
+      body.appendChild(wrap);
+      const reset = document.createElement("button");
+      reset.className = "rank-reset";
+      reset.textContent = "start over";
+      reset.addEventListener("click", renderQuestion);
+      body.appendChild(reset);
     } else {
       const wrap = document.createElement("div");
       wrap.className = "text-q";
