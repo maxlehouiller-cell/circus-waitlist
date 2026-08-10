@@ -643,6 +643,10 @@
       options: ["Music", "Sports", "Film", "Art"]
     },
     {
+      q: 5,   // conditional follow-up on the #1 obsession; saves to answer_5
+      type: "followup"
+    },
+    {
       q: 2,   // saves to answer_2 via RPC
       type: "select",
       text: "Have you ever traded before?",
@@ -662,6 +666,14 @@
       placeholder: "@yourhandle"
     }
   ];
+
+  // Follow-up shown based on the #1 ranked obsession. 4–5 popular options + "Other" (type-your-own).
+  const FOLLOWUP = {
+    "Music":  { text: "What's your sound?",  options: ["Hip-Hop / Rap", "Pop", "Country", "R&B", "Electronic"] },
+    "Sports": { text: "What's your game?",   options: ["Football", "Basketball", "Soccer", "Baseball"] },
+    "Film":   { text: "What do you watch?",  options: ["Action", "Comedy", "Horror", "Drama"] },
+    "Art":    { text: "What's your medium?", options: ["Street / Graffiti", "Digital", "Photography", "Painting"] }
+  };
 
   /* ===================== STATE ===================== */
   const state = { email: "", startPos: 0, qIndex: 0, submitted: false, busy: false };
@@ -835,6 +847,7 @@
           b.classList.add("ranked");
           badge.textContent = order.length;
           if (order.length === q.options.length) {
+            state.topObsession = order[0];   // drives the follow-up question
             setTimeout(() => answer(q.q, order.join(", ")), 380);
           }
         });
@@ -846,6 +859,42 @@
       reset.textContent = "start over";
       reset.addEventListener("click", renderQuestion);
       body.appendChild(reset);
+    } else if (q.type === "followup") {
+      const cat = state.topObsession || "Music";
+      const cfg = FOLLOWUP[cat] || FOLLOWUP["Music"];
+      $("q-text").textContent = cfg.text;                 // question depends on their #1
+      const wrap = document.createElement("div");
+      wrap.className = "options";
+      cfg.options.forEach(opt => {
+        const b = document.createElement("button");
+        b.className = "opt";
+        b.textContent = opt;
+        b.addEventListener("click", () => answer(q.q, cat + " → " + opt));
+        wrap.appendChild(b);
+      });
+      const other = document.createElement("button");
+      other.className = "opt";
+      other.textContent = "Other";
+      other.addEventListener("click", () => {
+        body.innerHTML = "";                              // swap options for a type-your-own field
+        const tw = document.createElement("div");
+        tw.className = "text-q";
+        const input = document.createElement("input");
+        input.type = "text";
+        input.placeholder = "Type your own…";
+        input.setAttribute("aria-label", cfg.text);
+        const go = document.createElement("button");
+        go.className = "btn";
+        go.textContent = "→";
+        const submit = () => { const v = input.value.trim(); if (v) answer(q.q, cat + " → " + v); };
+        go.addEventListener("click", submit);
+        input.addEventListener("keydown", (e) => { if (e.key === "Enter") submit(); });
+        tw.appendChild(input); tw.appendChild(go);
+        body.appendChild(tw);
+        setTimeout(() => input.focus(), 50);
+      });
+      wrap.appendChild(other);
+      body.appendChild(wrap);
     } else {
       const wrap = document.createElement("div");
       wrap.className = "text-q";
