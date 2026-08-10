@@ -652,6 +652,7 @@
       q: 3,   // saves to answer_3 via RPC
       type: "text",
       text: "Who would you back first?",
+      sub: "The one you'd bet on to blow up — before everyone else catches on.",
       placeholder: "A musician, athlete, filmmaker, artist…"
     },
     {
@@ -797,6 +798,13 @@
     const body = $("q-body");
     body.innerHTML = "";
 
+    if (q.sub) {
+      const sub = document.createElement("div");
+      sub.className = "q-sub";
+      sub.textContent = q.sub;
+      body.appendChild(sub);
+    }
+
     if (q.type === "select") {
       const wrap = document.createElement("div");
       wrap.className = "options";
@@ -809,12 +817,6 @@
       });
       body.appendChild(wrap);
     } else if (q.type === "rank") {
-      if (q.sub) {
-        const sub = document.createElement("div");
-        sub.className = "q-sub";
-        sub.textContent = q.sub;
-        body.appendChild(sub);
-      }
       const wrap = document.createElement("div");
       wrap.className = "options";
       const order = [];
