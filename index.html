@@ -429,13 +429,13 @@
   <script>
     (function () {
       // first clip is fixed; the rest are shuffled on each load
-      var rest = ["media/bg2.mp4", "media/bg3.mp4"];
+      var rest = ["media/bg2.mp4", "media/bg4.mp4"];
       for (var j = rest.length - 1; j > 0; j--) {
         var k = Math.floor(Math.random() * (j + 1));
         var tmp = rest[j]; rest[j] = rest[k]; rest[k] = tmp;
       }
       // clip 1 fixed first, obsession clip fixed second, then the shuffled rest
-      var clips = ["media/bg.mp4", "media/bg4.mp4"].concat(rest);
+      var clips = ["media/bg.mp4", "media/bg3.mp4"].concat(rest);
       var vids = [document.getElementById("bg-v0"), document.getElementById("bg-v1")];
       var active = 0;    // which video element is visible
       var curClip = 0;   // clip index playing in the active element
