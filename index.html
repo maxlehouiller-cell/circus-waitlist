@@ -536,7 +536,6 @@
           <h2 class="prompt">Do you want to move up in the waitlist?</h2>
           <div class="btn-stack">
             <button class="btn" id="moveup-btn">Yes, move me up</button>
-            <button class="btn ghost" id="skip-btn">Maybe later</button>
           </div>
         </section>
 
@@ -723,10 +722,6 @@
 
   /* ===================== POSITION SCREEN ===================== */
   $("moveup-btn").addEventListener("click", () => { state.qIndex = 0; renderQuestion(); show("screen-questions"); });
-  $("skip-btn").addEventListener("click", () => {
-    $("pos-num-skip").textContent = fmt(state.startPos);
-    show("screen-done-skip");
-  });
 
   /* ===================== QUESTIONS ===================== */
   function renderQuestion() {
