@@ -413,6 +413,28 @@
   }
   .q-back:hover { color: var(--bone-dim); }
 
+  /* share screen block ("wait, one more") */
+  .share-block {
+    margin-top: 1.6rem;
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+  .share-block.show { opacity: 1; transform: translateY(0); }
+  .share-block .prompt { margin: 0 0 0.6rem; }
+  .share-block .sub { margin-bottom: 1.4rem; }
+  .share-hint {
+    font-family: 'Sligoil Micro', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    color: var(--up);
+    min-height: 1rem;
+    margin-top: 0.7rem;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .share-block { transition: none; }
+  }
+
   .text-q { display: flex; gap: 0.5rem; }
   .text-q input {
     flex: 1; min-width: 0;
@@ -612,7 +634,13 @@
           <div class="quote-label">Your spot</div>
           <div class="quote"><span class="hash">#</span><span id="pos-num-final">—</span></div>
           <div class="tick" id="tick">▲ moved up 10</div>
-          <p class="closing-line">You're in. We'll be in touch before the doors open.</p>
+          <div class="share-block" id="share-block">
+            <h2 class="prompt">Wait — there's one more.</h2>
+            <p class="sub">Share Circus with someone who gets it. Every friend who joins bumps you up.</p>
+            <button class="btn" id="share-btn">Share</button>
+            <div class="share-hint" id="share-hint"></div>
+          </div>
+          <p class="closing-line">You're on the list — we'll be in touch before the doors open.</p>
         </section>
 
         <!-- SCREEN 4 — skipped -->
@@ -696,6 +724,14 @@
     "Content-Type": "application/json"
   };
 
+  // Referral: capture ?ref from the URL and log the open (fire-and-forget).
+  const REF = (new URLSearchParams(location.search).get("ref") || "").slice(0, 40);
+  if (REF) {
+    fetch(SUPABASE_URL + "/rest/v1/rpc/log_ref_open", {
+      method: "POST", headers, body: JSON.stringify({ p_ref: REF })
+    }).catch(() => {});
+  }
+
   // Save one answer via RPC (q = 1, 2, or 3). Fire-and-forget.
   async function saveAnswer(q, value) {
     try {
@@ -723,7 +759,7 @@
       const r = await fetch(SUPABASE_URL + "/rest/v1/waitlist", {
         method: "POST",
         headers: { ...headers, "Prefer": "return=minimal" },
-        body: JSON.stringify({ email })
+        body: JSON.stringify(REF ? { email, referred_by: REF } : { email })
       });
       if (r.status === 409) return "duplicate";   // unique violation
       if (r.ok) return "inserted";
@@ -956,8 +992,19 @@
     show("screen-done-up");
     animateCount($("pos-num-final"), from, to, 650, () => {
       $("tick").classList.add("show");
+      setTimeout(() => $("share-block").classList.add("show"), 700);   // "wait, one more" beat
     });
   }
+
+  // Share button — native share sheet on mobile, copy-link on desktop. Link carries the ref code.
+  $("share-btn").addEventListener("click", async () => {
+    const url = location.origin + "/?ref=" + encodeURIComponent(state.startPos);
+    const data = { title: "circus", text: "prove your taste — get on the circus waitlist.", url: url };
+    try {
+      if (navigator.share) { await navigator.share(data); }
+      else { await navigator.clipboard.writeText(url); $("share-hint").textContent = "link copied ✓"; }
+    } catch (e) { /* user cancelled the share sheet */ }
+  });
   function animateCount(el, from, to, dur, done) {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       el.textContent = fmt(to); if (done) done(); return;
