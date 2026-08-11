@@ -398,6 +398,8 @@
     text-underline-offset: 3px;
   }
   .rank-reset:hover { color: var(--bone-dim); }
+  .rank-go { display: block; margin: 1.1rem auto 0; }
+  .rank-go.hidden { display: none; }
 
   .q-back {
     display: inline-block;
@@ -880,7 +882,23 @@
     } else if (q.type === "rank") {
       const wrap = document.createElement("div");
       wrap.className = "options";
-      const order = [];
+      const order = [];        // ranked options, in order
+      const btns = {};         // opt -> { btn, badge }
+
+      const go = document.createElement("button");
+      go.className = "btn rank-go hidden";
+      go.textContent = "→";
+
+      function renumber() {
+        q.options.forEach(opt => {
+          const b = btns[opt].btn, badge = btns[opt].badge;
+          const idx = order.indexOf(opt);
+          if (idx === -1) { b.classList.remove("ranked"); badge.textContent = ""; }
+          else { b.classList.add("ranked"); badge.textContent = idx + 1; }
+        });
+        go.classList.toggle("hidden", order.length !== q.options.length);
+      }
+
       q.options.forEach(opt => {
         const b = document.createElement("button");
         b.className = "opt rank-opt";
@@ -891,18 +909,23 @@
         b.appendChild(badge);
         b.appendChild(label);
         b.addEventListener("click", () => {
-          if (b.classList.contains("ranked")) return;
-          order.push(opt);
-          b.classList.add("ranked");
-          badge.textContent = order.length;
-          if (order.length === q.options.length) {
-            state.topObsession = order[0];   // drives the follow-up question
-            setTimeout(() => answer(q.q, order.join(", ")), 380);
-          }
+          const idx = order.indexOf(opt);
+          if (idx === -1) order.push(opt);   // rank it
+          else order.splice(idx, 1);         // un-rank it (tap again)
+          renumber();
         });
+        btns[opt] = { btn: b, badge: badge };
         wrap.appendChild(b);
       });
       body.appendChild(wrap);
+
+      go.addEventListener("click", () => {
+        if (order.length !== q.options.length) return;
+        state.topObsession = order[0];       // drives the follow-up question
+        answer(q.q, order.join(", "));
+      });
+      body.appendChild(go);
+
       const reset = document.createElement("button");
       reset.className = "rank-reset";
       reset.textContent = "start over";
