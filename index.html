@@ -724,6 +724,11 @@
     "Content-Type": "application/json"
   };
 
+  // Analytics: log a page visit (fire-and-forget).
+  fetch(SUPABASE_URL + "/rest/v1/rpc/log_event", {
+    method: "POST", headers, body: JSON.stringify({ p_kind: "visit" })
+  }).catch(() => {});
+
   // Referral: capture ?ref from the URL and log the open (fire-and-forget).
   const REF = (new URLSearchParams(location.search).get("ref") || "").slice(0, 40);
   if (REF) {
