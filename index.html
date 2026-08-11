@@ -505,8 +505,8 @@
        Leave it empty for the neutral grey placeholder.            -->
   <div class="bg">
     <!-- two stacked videos crossfade so clip changes are seamless (no gap/flash) -->
-    <video class="bg-vid" id="bg-v0" muted playsinline preload="auto"></video>
-    <video class="bg-vid" id="bg-v1" muted playsinline preload="none"></video>
+    <video class="bg-vid" id="bg-v0" autoplay muted playsinline preload="auto" poster="media/poster.jpg"></video>
+    <video class="bg-vid" id="bg-v1" autoplay muted playsinline preload="none"></video>
   </div>
   <script>
     (function () {
@@ -546,6 +546,13 @@
       vids[0].addEventListener("playing", loadClip1, { once: true });
       // fallback so clip 2 still loads even if 'playing' never fires (blocked autoplay)
       setTimeout(loadClip1, 2500);
+
+      // If autoplay is blocked (e.g. iOS Low Power Mode), start the video on the
+      // first interaction so it doesn't stay stuck on the red poster.
+      function kickPlay() { go(vids[active]); }
+      ["touchstart", "click", "scroll"].forEach(function (ev) {
+        window.addEventListener(ev, kickPlay, { once: true, passive: true });
+      });
 
       function swap() {
         var nextV = (active + 1) % 2;
