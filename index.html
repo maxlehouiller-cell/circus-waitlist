@@ -600,9 +600,11 @@
         <!-- SCREEN 2 — questions -->
         <section class="screen" id="screen-questions">
           <button class="q-back" id="q-back">← back</button>
-          <div class="progress" id="q-progress">01 / 03</div>
-          <h2 class="question" id="q-text">Question</h2>
-          <div id="q-body"></div>
+          <div id="q-content">
+            <div class="progress" id="q-progress">01 / 03</div>
+            <h2 class="question" id="q-text">Question</h2>
+            <div id="q-body"></div>
+          </div>
         </section>
 
         <!-- SCREEN 3 — moved up -->
@@ -803,7 +805,7 @@
   $("moveup-btn").addEventListener("click", () => { state.qIndex = 0; renderQuestion(); show("screen-questions"); });
   // step back to the previous question (or back to the position screen from Q1)
   $("q-back").addEventListener("click", () => {
-    if (state.qIndex > 0) { state.qIndex--; renderQuestion(); }
+    if (state.qIndex > 0) { swapQuestion(() => { state.qIndex--; renderQuestion(); }); }
     else { show("screen-position"); }
   });
 
@@ -921,11 +923,27 @@
     }
   }
 
+  // fade/slide the question content out, run the change, fade the new one in
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function swapQuestion(mutate) {
+    const c = $("q-content");
+    if (reduceMotion || !c.animate) { mutate(); return; }
+    c.animate(
+      [{ opacity: 1, transform: "translateY(0)" }, { opacity: 0, transform: "translateY(-6px)" }],
+      { duration: 150, easing: "ease-in" }
+    ).finished.then(() => {
+      mutate();
+      c.animate(
+        [{ opacity: 0, transform: "translateY(10px)" }, { opacity: 1, transform: "translateY(0)" }],
+        { duration: 260, easing: "cubic-bezier(.2,.7,.2,1)" }
+      );
+    }).catch(() => mutate());
+  }
+
   function answer(q, value) {
     saveAnswer(q, value);                          // real write via locked-down RPC
     if (state.qIndex < QUESTIONS.length - 1) {
-      state.qIndex++;
-      renderQuestion();
+      swapQuestion(() => { state.qIndex++; renderQuestion(); });
     } else {
       finishMovedUp();
     }
